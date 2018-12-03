@@ -4,7 +4,7 @@ This is a very basic PJL or Jetdirect honeypot created as a byproduct of TUM's h
 
 When connecting to it via [PRET](https://github.com/RUB-NDS/PRET), you probably won't notice a difference to other printers, and dropping PCL files will store them in a configurable directory (see usage).
 
-The honeypot is a standalone Python 3 script and is contained in a single file, allowing you to drop it on your existing honeypots easily. Furthermore, you can use the [Dockerfile](Dockerfile) to include it in your honeypot setup conveniently.
+The honeypot is a standalone Python 3 script and is contained in a single file, allowing you to drop it on your existing honeypots easily. Furthermore, you can use the [Dockerfile](Dockerfile) to include it in your honeypot setup conveniently. Please refer to the [docker-compose.yml](docker-compose.yml) for using the image within a compose environment.
 
 ## Usage
 

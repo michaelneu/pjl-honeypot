@@ -1,0 +1,12 @@
+version: "2"
+
+services:
+  jetdirect:
+    build: .
+    image: jetdirect_honeypot
+    restart: always
+    ports:
+      - "9100:9100"
+    volumes:
+      - ./jetdirect.log:/app/jetdirect.log
+      - ./prints:/app/prints
