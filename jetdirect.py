@@ -8,7 +8,7 @@ import re
 import hashlib
 from collections import defaultdict
 
-class JPLServer:
+class PJLServer:
     def __init__(self):
         self._server = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 
@@ -26,9 +26,9 @@ class JPLServer:
         ip = addr[0]
         logging.info("%s connected" % ip)
 
-        return JPLClient(client, ip)
+        return PJLClient(client, ip)
 
-class JPLClient:
+class PJLClient:
     def __init__(self, client, address):
         self._client = client
         self._address = address
@@ -264,7 +264,7 @@ if __name__ == "__main__":
         logging.warning("pcl directory '%s' not found" % pcl_directory)
         exit(2)
 
-    server = JPLServer()
+    server = PJLServer()
     server.listen(port)
 
     while True:
