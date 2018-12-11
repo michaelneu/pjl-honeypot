@@ -24,7 +24,7 @@ class PJLServer:
     def accept(self):
         client, addr = self._server.accept()
         ip = addr[0]
-        logging.info("%s connected" % ip)
+        logging.info("[%s] connected" % ip)
 
         return PJLClient(client, ip)
 
@@ -33,21 +33,24 @@ class PJLClient:
         self._client = client
         self._address = address
 
-    def get_command(self, junk_size=1024):
+    def get_command(self, chunk_size=1024):
         command = b""
+        packet_count = 0
 
         while True:
-            packet = self._client.recv(junk_size)
+            packet = self._client.recv(chunk_size)
 
             if not packet:
                 break
 
             command += packet
+            packet_count += 1
 
             if b"\r\n" in command:
                 break
 
-        logging.info("received command '%s' from %s" % (command, self._address))
+        logging.info("[%s] received %d bytes (%d packets)" % (self._address, len(command), packet_count))
+        logging.debug("[%s] received command '%s'" % (self._address, command))
 
         return command
 
@@ -273,19 +276,21 @@ if __name__ == "__main__":
         except KeyboardInterrupt:
             break
 
+        is_pcl_session = False
+        pcl_file_bytes = b""
+
         while True:
             try:
                 program = client.get_command()
 
                 if program.startswith(b"\x1bE\x1b&l"):
-                    md5 = hashlib.md5()
-                    md5.update(program)
-                    file_hash = md5.hexdigest()
-                    filename = os.path.join(pcl_directory, file_hash)
-                    logging.info("received document %s" % filename)
+                    is_pcl_session = True
 
-                    with open(filename, "wb") as file_handle:
-                        file_handle.write(program)
+                if is_pcl_session:
+                    if not program:
+                        break
+
+                    pcl_file_bytes += program
                     continue
 
                 if len(program) > 0 and program[0] == ord(b"\x1b"):
@@ -309,6 +314,19 @@ if __name__ == "__main__":
 
             reply = bytes("\r\n".join(replies), "utf-8")
             client.reply(reply)
+
+        if is_pcl_session:
+            md5 = hashlib.md5()
+            md5.update(pcl_file_bytes)
+            file_hash = md5.hexdigest()
+            filename = os.path.join(pcl_directory, file_hash)
+            logging.info("received document %s" % filename)
+
+            with open(filename, "wb") as file_handle:
+                file_handle.write(pcl_file_bytes)
+
+            is_pcl_session = False
+            pcl_file_bytes = b""
 
         client.close()
 
