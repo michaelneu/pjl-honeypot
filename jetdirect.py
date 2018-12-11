@@ -32,6 +32,10 @@ class PJLClient:
     def __init__(self, client, address):
         self._client = client
         self._address = address
+    
+    @property
+    def ip(self):
+        return self._address
 
     def get_command(self, chunk_size=1024):
         command = b""
@@ -49,13 +53,13 @@ class PJLClient:
             if b"\r\n" in command:
                 break
 
-        logging.info("[%s] received %d bytes (%d packets)" % (self._address, len(command), packet_count))
-        logging.debug("[%s] received command '%s'" % (self._address, command))
+        logging.info("[%s] received %d bytes (%d packets)" % (self.ip, len(command), packet_count))
+        logging.debug("[%s] received command %s" % (self.ip, command))
 
         return command
 
     def reply(self, message):
-        logging.info("sending '%s' to %s" % (message, self._address))
+        logging.info("[%s] sending %s" % (self.ip, message))
         self._client.send(message)
 
     def close(self):
@@ -259,7 +263,7 @@ if __name__ == "__main__":
 
     logging.basicConfig(
         level = logging.DEBUG,
-        format="%(asctime)s [%(levelname)s]  %(message)s",
+        format="%(asctime)s [%(levelname)s]\t%(message)s",
         handlers=log_handlers
     )
 
@@ -320,7 +324,7 @@ if __name__ == "__main__":
             md5.update(pcl_file_bytes)
             file_hash = md5.hexdigest()
             filename = os.path.join(pcl_directory, file_hash)
-            logging.info("received document %s" % filename)
+            logging.info("[%s] received document %s" % (client.ip, filename))
 
             with open(filename, "wb") as file_handle:
                 file_handle.write(pcl_file_bytes)
